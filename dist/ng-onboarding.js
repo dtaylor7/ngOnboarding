@@ -58,7 +58,7 @@
         },
         replace: true,
         link: function(scope, element, attrs) {
-          var attributesToClear, curStep, setupOverlay, setupPositioning;
+          var attributesToClear, curStep, setupOverlay, setupPositioning, elClone;
           curStep = null;
           attributesToClear = ['title', 'top', 'right', 'bottom', 'left', 'width', 'height', 'position'];
           scope.next = function() {
@@ -84,15 +84,24 @@
           };
           var hideOverlay = function(){
             scope.enabled = false;
-            if(curStep && curStep['attachTo']){
-              $(curStep['attachTo']).removeClass('onboarding-focus');
+            // if(curStep && curStep['attachTo']){
+            //   $(curStep['attachTo']).removeClass('onboarding-focus');
+            // }
+            if(elClone){
+              $('.onboarding-focus').remove();
+              delete elClone;
             }
-          }
+          };
           var updateView = function(){
             var attr, k, v, _i, _len;
             curStep = scope.steps[scope.index];
             if(!curStep){
               return;
+            }
+            if(curStep && curStep['attachTo'] && !$(curStep['attachTo']).length){
+              scope.steps.splice(scope.index, 1);
+              console.log(scope.steps)
+              return updateView();
             }
             scope.lastStep = scope.index + 1 === scope.steps.length;
             scope.showNextButton = scope.index + 1 < scope.steps.length;
@@ -125,7 +134,7 @@
             return setupPositioning();
           };
           scope.$watch('enabled', function(newVal, oldVal){
-            if(newVal !== oldVal)
+            if(newVal !== oldVal && newVal)
               updateView();
           });
           scope.$watch('index', function(newVal, oldVal) {
@@ -134,13 +143,34 @@
               setupOverlay(false);
               return;
             }
-            updateView();
+            if(scope.enabled){
+              updateView();
+            }
           });
           setupOverlay = function(showOverlay) {
-            $('.onboarding-focus').removeClass('onboarding-focus');
+            // $('.onboarding-focus').removeClass('onboarding-focus');
             if (showOverlay) {
               if (curStep['attachTo'] && scope.overlay) {
-                return $(curStep['attachTo']).addClass('onboarding-focus');
+
+                // console.log('ere', element)
+                if(elClone){
+                  $('.onboarding-focus').remove();
+                  delete elClone;
+                }
+                // $timeout(function(){
+                  elClone = $(curStep['attachTo']).clone();
+                  elClone.addClass('onboarding-focus')
+                  var position = $(curStep['attachTo']).offset();
+                  // console.log()
+                  elClone.css({
+                    width: $(curStep['attachTo']).outerWidth(),
+                    height: $(curStep['attachTo']).outerHeight(),
+                    top: position.top,
+                    left: position.left
+                  })
+                  $(curStep['attachTo']).parent().append(elClone)
+                // }, 100)
+                // return $(curStep['attachTo']).addClass('onboarding-focus');
               }
             }
           };
@@ -195,7 +225,7 @@
               }
             }
             if (scope.position && scope.position.length) {
-              return scope.positionClass = "onboarding-" + scope.position;
+              // return scope.positionClass = "onboarding-" + scope.position;
             } else {
               return scope.positionClass = null;
             }

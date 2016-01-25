@@ -189,6 +189,7 @@
 }
 .onboarding-focus {
   z-index: 100000;
+  position: fixed !important;
 }
 .onboarding-step-info {
   float: left;
