@@ -62,7 +62,11 @@
           curStep = null;
           attributesToClear = ['title', 'top', 'right', 'bottom', 'left', 'width', 'height', 'position'];
           scope.next = function() {
-            return scope.index = scope.index + 1;
+            var newIndex = scope.index + 1;
+            if(newIndex > scope.steps.length-1){
+              newIndex = 0;
+            }
+            return scope.index = newIndex;
           };
           scope.previous = function() {
             var newIndex = scope.index - 1;
@@ -72,12 +76,18 @@
             return scope.index = newIndex;
           };
           scope.close = function() {
-            scope.enabled = false;
+            hideOverlay();
             setupOverlay(false);
             if (scope.onFinishCallback) {
               return scope.onFinishCallback();
             }
           };
+          var hideOverlay = function(){
+            scope.enabled = false;
+            if(curStep && curStep['attachTo']){
+              $(curStep['attachTo']).removeClass('onboarding-focus');
+            }
+          }
           var updateView = function(){
             var attr, k, v, _i, _len;
             curStep = scope.steps[scope.index];
@@ -109,24 +119,24 @@
             scope.closeButtonText = $sce.trustAsHtml(scope.closeButtonText);
             scope.actualStepText = $sce.trustAsHtml(scope.actualStepText);
             scope.totalStepText = $sce.trustAsHtml(scope.totalStepText);
-            setupOverlay();
+            if(scope.enabled){
+              setupOverlay(true);
+            }
             return setupPositioning();
           };
-          scope.$watch('enabled', function(){
-            updateView();
+          scope.$watch('enabled', function(newVal, oldVal){
+            if(newVal !== oldVal)
+              updateView();
           });
           scope.$watch('index', function(newVal, oldVal) {
             if (typeof newVal === 'undefined') {
-              scope.enabled = false;
+              hideOverlay();
               setupOverlay(false);
               return;
             }
             updateView();
           });
           setupOverlay = function(showOverlay) {
-            if (showOverlay == null) {
-              showOverlay = true;
-            }
             $('.onboarding-focus').removeClass('onboarding-focus');
             if (showOverlay) {
               if (curStep['attachTo'] && scope.overlay) {
