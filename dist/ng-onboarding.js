@@ -54,7 +54,7 @@
           enabled: '=',
           steps: '=',
           onFinishCallback: '=',
-          index: '=stepIndex'
+          // index: '=stepIndex'
         },
         replace: true,
         link: function(scope, element, attrs) {
@@ -232,7 +232,7 @@
           };
           scope.$watch('steps', function(){
             if (scope.steps.length && !scope.index) {
-              return scope.index = 0;
+              scope.index = 0;
             }
           });
 
