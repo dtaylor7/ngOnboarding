@@ -100,7 +100,7 @@
             }
             if(curStep && curStep['attachTo'] && !$(curStep['attachTo']).length){
               scope.steps.splice(scope.index, 1);
-              console.log(scope.steps)
+              // console.log(scope.steps)
               return updateView();
             }
             scope.lastStep = scope.index + 1 === scope.steps.length;
@@ -157,18 +157,45 @@
                   $('.onboarding-focus').remove();
                   delete elClone;
                 }
+
+                var el = curStep['attachTo'];
+
+                if($(curStep['attachTo']).parents('#main-schematic').length){
+                  el = '#main-schematic';
+                }
+
+                // console.log($(curStep['attachTo']).parents('#main-schematic'))
                 // $timeout(function(){
-                  elClone = $(curStep['attachTo']).clone();
+                  // if($(curStep['attachTo']).parents('#main-schematic').length){
+                  //   elClone = $('#main-schematic').clone();
+                  // }else{
+                    elClone = $(el).clone();
+
+                    if($(curStep['attachTo']).parents('#main-schematic').length){
+                      elClone.find('.schematic.leaflet-container').attr('style', 'background: #656565 !important');
+                      elClone.find('.leaflet-map-pane').css({display:"none"});
+
+
+                    }
+                  // }
+
                   elClone.addClass('onboarding-focus')
-                  var position = $(curStep['attachTo']).offset();
+                  var position = $(el).offset();
                   // console.log()
                   elClone.css({
-                    width: $(curStep['attachTo']).outerWidth(),
-                    height: $(curStep['attachTo']).outerHeight(),
+                    width: $(el).outerWidth(),
+                    height: $(el).outerHeight(),
                     top: position.top,
                     left: position.left
                   })
-                  $(curStep['attachTo']).parent().append(elClone)
+
+                  // if($(curStep['attachTo']).parents('#main-schematic').length){
+                  //   // elClone = $('#main-schematic').clone();
+                  //   $('#main-schematic').parent().append(elClone)
+                  // }else{
+                    $(el).parent().append(elClone)
+                  // }
+
                 // }, 100)
                 // return $(curStep['attachTo']).addClass('onboarding-focus');
               }
@@ -201,6 +228,7 @@
                 }
                 scope.left = left;
                 scope.right = right;
+                // console.log('left,right')
               }
               if (!(scope.top || scope.bottom)) {
                 top = null;
@@ -224,11 +252,24 @@
                 scope.bottom = bottom;
               }
             }
+            if(scope.left + 400 > $(window).width()){
+              scope.left = $(window).width() - 450;
+            }
+
+            if(scope.right + 400 > $(window).width()){
+              scope.right = $(window).width() - 450;
+            }
+
+            if(scope.bottom + 200 > $(window).height()){
+              scope.bottom = $(window).height() - 200;
+            }
+
             if (scope.position && scope.position.length) {
               // return scope.positionClass = "onboarding-" + scope.position;
             } else {
               return scope.positionClass = null;
             }
+
           };
           scope.$watch('steps', function(){
             if (scope.steps.length && !scope.index) {
